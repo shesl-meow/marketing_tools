@@ -1,4 +1,4 @@
-"""Text classification agent package."""
+"""Exported comment_processor agent and helpers."""
 
 from .agent import agent, tool
 

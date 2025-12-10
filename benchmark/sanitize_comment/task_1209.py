@@ -10,7 +10,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from src.llms import volcano
-from src.agents.sanitize_comment.tool import tool
+from src.agents.sanitize_comment import tool
 
 BATCH_SIZE = 50
 BASE_DIR = Path(__file__).resolve().parent

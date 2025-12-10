@@ -2,6 +2,9 @@
 
 import uuid
 from pathlib import Path
+from typing import Optional
+
+from langchain_core.tools import tool
 
 
 FILES_DIR = Path(__file__).resolve().parents[1] / "files"
@@ -13,22 +16,33 @@ def _ensure_files_dir() -> Path:
     return FILES_DIR
 
 
-def save_file(content: str) -> str:
+@tool
+def read_text_file(file_path: str) -> str:
+    """Agent tool: read text content from the provided path.
+
+    Args:
+        file_path: Absolute or relative path to the text file to read.
     """
-    Persist the provided string content to disk and return a file identifier.
-    """
-    files_dir = _ensure_files_dir()
-    file_id = uuid.uuid4().hex
-    file_path = files_dir / f"{file_id}.txt"
-    file_path.write_text(content, encoding="utf-8")
-    return file_id
+    path = Path(file_path).expanduser()
+    if not path.exists():
+        raise FileNotFoundError(f"input file not found: {path}")
+    return path.read_text(encoding="utf-8")
 
 
-def load_file(file_id: str) -> str:
+@tool
+def write_text_file(content: str, file_path: Optional[str]) -> str:
+    """Agent tool: write text content to a path or generated id.
+
+    Args:
+        content: Text content to persist.
+        file_path: Optional path to write to; when omitted a new file path is generated in `files/`.
     """
-    Load a previously saved file string by its file identifier.
-    """
-    file_path = _ensure_files_dir() / f"{file_id}.txt"
-    if not file_path.exists():
-        raise FileNotFoundError(f"file with id '{file_id}' was not found.")
-    return file_path.read_text(encoding="utf-8")
+    if file_path:
+        path = Path(file_path).expanduser()
+    else:
+        files_dir = _ensure_files_dir()
+        file_id = uuid.uuid4().hex
+        path = files_dir / f"{file_id}.txt"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    return str(path)
