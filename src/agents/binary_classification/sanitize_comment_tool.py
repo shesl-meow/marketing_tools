@@ -9,6 +9,7 @@ from typing import List, Mapping, Optional, Union
 from langchain_core.tools import tool
 
 from .agent import tool as binary_classification_tool
+from ...tools.file_storage import read_text_file, write_text_file
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +26,9 @@ def sanitize_comment_tool(input_file_path: str, output_file_path: Optional[str] 
     Returns:
         sanitized comment json file path. content structure example: `[{ "id": 1, "user": "CyberArtist", "content": "这光影效果真的绝绝子，比我手绘的快多了！", "likes": 234, "date": "2025-06-01" }]`
     """
-    input_path = Path(input_file_path)
     try:
-        with input_path.open("r", encoding="utf-8") as infile:
-            comments: List[Mapping[str, Union[int, str]]] = json.load(infile)
+        json_content = read_text_file.invoke({"file_path": input_file_path})
+        comments: List[Mapping[str, Union[int, str]]] = json.loads(json_content)
     except Exception as exc:
         logger.error("Failed to read input file %s: %s", input_file_path, exc)
         raise
@@ -70,17 +70,9 @@ def sanitize_comment_tool(input_file_path: str, output_file_path: Optional[str] 
         comment for comment, label in zip(comments, labels) if str(label) == positive_label
     ]
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    if output_file_path:
-        output_path = Path(output_file_path)
-    else:
-        output_path = input_path.with_name(f"sanitized_{input_path.stem}_{timestamp}.json")
     try:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with output_path.open("w", encoding="utf-8") as outfile:
-            json.dump(filtered_comments, outfile, ensure_ascii=False, indent=2)
+        output_content = json.dumps(filtered_comments, ensure_ascii=False, indent=2)
+        return write_text_file.invoke({"content": output_content, "file_path": output_file_path})
     except Exception as exc:
-        logger.error("Failed to write sanitized file %s: %s", output_path, exc)
+        logger.error("Failed to write sanitized file %s: %s", output_file_path, exc)
         raise
-
-    return str(output_path)

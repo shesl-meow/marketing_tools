@@ -30,7 +30,7 @@ def read_text_file(file_path: str) -> str:
 
 
 @tool
-def write_text_file(content: str, file_path: Optional[str]) -> str:
+def write_text_file(content: str, file_path: Optional[str] = None) -> str:
     """Agent tool: write text content to a path or generated id.
 
     Args:

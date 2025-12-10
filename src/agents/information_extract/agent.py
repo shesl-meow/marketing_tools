@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Dict, List, Union
+from typing import List
 
 import json_repair
 from langchain.agents import create_agent
@@ -19,8 +19,8 @@ def system_prompt() -> str:
         "You should identify specified information from a list of user texts and return the distinct items you find.\n"
         "Aggregate information as more as possible, avoid similar information and keep the most representative information.\n"
         "Return only a JSON array of unique strings.\n\n"
-        "You will receive a list of texts in JSON format, each with 'id' and 'content' (text content) keys.\n"
-        "Input example: `Extra emotions from the below texts json:\\n[{\"id\": \"123\", \"content\": \"I love this\"},{\"id\": \"456\", \"content\": \"This makes me angry\"}]`\n"
+        "You will receive a list of texts in JSON format.\n"
+        "Input example: `Extract sentiment from the below texts json:\\n[\"I love this\", \"This makes me angry\"]`\n"
         "Output example: `[\"joy\", \"anger\"]`\n"
         "Do not include duplicates or explanations—only the JSON array."
     )
@@ -34,22 +34,22 @@ def agent(model=None):
 
 @lc_tool
 def tool(
-    texts: List[Dict[str, Union[int, str]]],
+    texts: List[str],
     information_type: str,
 ) -> List[str]:
     """
     Extract specific information across a list of texts.
 
     Args:
-        texts: List of text dictionaries with 'id' and 'content' keys.
-        information_type: Description of the information to extract (e.g., ingredients, emotions).
+        texts: List of text strings.
+        information_type: Description of the information to extract (e.g., features, demands, sentiments).
 
     Returns:
         List of distinct information items found in the texts.
     """
     input_json = json.dumps(texts, ensure_ascii=False)
     in_agent = agent()
-    content = f"Extra {information_type} from the below texts json:\n{input_json}"
+    content = f"Extract {information_type} from the below texts json:\n{input_json}"
     result = in_agent.invoke({"messages": [{"role": "user", "content": content}]})
     response_content = result["messages"][-1].content
 

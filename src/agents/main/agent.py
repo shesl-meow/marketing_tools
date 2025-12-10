@@ -9,7 +9,7 @@ from langchain.agents import create_agent
 from langchain.agents.middleware import TodoListMiddleware
 
 from ...llms.volcano import create_model
-from ..information_extract import tool as information_extract_tool
+from ..information_extract import demand_extract_tool
 from ..binary_classification import sanitize_comment_tool
 from ..text_classification import tool as text_classification_tool
 from ..report_formatter import tool as report_formatter_tool
@@ -37,7 +37,7 @@ def sop_preference_prompt() -> str:
         "You have a 'write_todos' tool, which can maintain a todo list for complex tasks.\n\n"
         "Generate a 'Product Iteration Proposal' by following these steps:\n"
         "1. Sanitize the input user comments using the 'sanitize_comment' tool;\n"
-        "2. Extract all demands from the sanitized comments using the 'information_extract' tool;\n"
+        "2. Extract all demands from the sanitized comments using the 'demand_extract_tool' tool;\n"
         "3. Take demand as categories, classify the comments into categories using the 'text_classification' tool;\n"
         "4. Extract the top 3 most frequent demands from the demand categories result using the 'invert_index', 'sort_by_len' tools;\n"
         "5. Analyze the sentiment into 'positive', 'negative', 'neutral', of the sanitized comments using the 'text_classification' tool;\n"
@@ -67,7 +67,7 @@ def agent(model=None):
             pie_chart,
 
             sanitize_comment_tool,
-            information_extract_tool,
+            demand_extract_tool,
             text_classification_tool,
             report_formatter_tool,
         ],
