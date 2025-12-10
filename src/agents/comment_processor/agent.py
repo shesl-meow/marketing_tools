@@ -6,7 +6,6 @@ import logging
 
 from langchain.agents import create_agent
 from langchain.agents.middleware import TodoListMiddleware
-from langchain_core.tools import tool as lc_tool
 
 from ...llms.volcano import create_model
 from ..information_extract import tool as information_extract_tool
@@ -14,6 +13,7 @@ from ..sanitize_comment import tool as sanitize_comment_tool
 from ..text_classification import tool as text_classification_tool
 from ...tools.file_storage import read_text_file, write_text_file
 from ...tools.statistics import invert_index, sort_by_len
+from ...tools.plot_draw import bar_chart, heap_map, pie_chart
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,8 @@ def system_prompt() -> str:
         "Return only the file path of the final output file."
     )
 
+def sop_preference_prompt() -> str:
+    return ()
 
 def agent(model=None):
     """Create the comment processor agent with planning middleware enabled."""
@@ -43,6 +45,10 @@ def agent(model=None):
             write_text_file,
             invert_index,
             sort_by_len,
+
+            bar_chart,
+            heap_map,
+            pie_chart,
 
             sanitize_comment_tool,
             information_extract_tool,
