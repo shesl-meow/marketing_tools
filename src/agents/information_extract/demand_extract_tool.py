@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 @tool
 def demand_extract_tool(input_file_path: str, output_file_path: Optional[str] = None) -> str:
     """
-    Extract user demands from a comment json file.
+    Extract user demand categories from a comment json file.
 
     Args:
         input_file_path: File path of the input comment json. Example structure:
@@ -25,8 +25,8 @@ def demand_extract_tool(input_file_path: str, output_file_path: Optional[str] = 
         output_file_path: Optional output path; defaults to alongside the input file.
 
     Returns:
-        Output file path containing demand extraction results.
-        Output structure example: `[ "改善画质" ]`
+        Output file path containing demand category extraction results.
+        Output structure example: `[ "画质提升需求", "导出与分享需求" ]`
     """
     try:
         json_content = read_text_file.invoke({"file_path": input_file_path})
@@ -40,20 +40,20 @@ def demand_extract_tool(input_file_path: str, output_file_path: Optional[str] = 
         raw_text = comment.get("content") or ""
         texts.append(raw_text)
 
-    demands = information_extract_tool.invoke(
+    demand_categories = information_extract_tool.invoke(
         {
             "texts": texts,
-            "information_type": "user demands, requests, or product requirements",
+            "information_type": "the broader categories/themes of user demands, requests, or product requirements, not individual requests",
         }
     )
 
-    if not isinstance(demands, list) or not demands:
-        logger.error("Information extractor returned invalid demand results.")
-        raise ValueError("Information extractor returned invalid demand results.")
+    if not isinstance(demand_categories, list) or not demand_categories:
+        logger.error("Information extractor returned invalid demand category results.")
+        raise ValueError("Information extractor returned invalid demand category results.")
 
     try:
-        output_content = json.dumps(demands, ensure_ascii=False, indent=2)
+        output_content = json.dumps(demand_categories, ensure_ascii=False, indent=2)
         return write_text_file.invoke({"content": output_content, "file_path": output_file_path})
     except Exception as exc:
-        logger.error("Failed to write demand file %s: %s", output_file_path, exc)
+        logger.error("Failed to write demand category file %s: %s", output_file_path, exc)
         raise

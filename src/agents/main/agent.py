@@ -43,7 +43,7 @@ def sop_preference_prompt() -> str:
         "5. Process data for report using the statistic tools: 'invert_index', 'sort_by_len', 'count_elements' and 'sort_by_val';\n"
         "   At least we can conclude below metrics from the processed data: Top 3 most frequent demands, Percentage of all sentiment categories, Reason of negtive sentiment;"
         "6. Draw plot to make result more readable using the 'bar_chart', 'heap_map', 'pie_chart' tools;\n"
-        "7. Provide the graph and sub_report path to the 'report_formatter' tool to generate the final 'Product Iteration Proposal' report;"
+        "7. Provide the raw input file path, graph file path and sub_report file path to the 'report_formatter' tool to generate the final 'Product Iteration Proposal' report;"
     )
 
 def agent(model=None):
