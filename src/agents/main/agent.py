@@ -10,7 +10,7 @@ from langchain.agents.middleware import TodoListMiddleware
 
 from ...llms.volcano import create_model
 from ..information_extract import tool as information_extract_tool
-from ..sanitize_comment import tool as sanitize_comment_tool
+from ..binary_classification import sanitize_comment_tool
 from ..text_classification import tool as text_classification_tool
 from ..report_formatter import tool as report_formatter_tool
 from ...tools.file_storage import read_text_file, write_text_file

@@ -34,11 +34,16 @@ def agent(model=None):
 
 
 @lc_tool
-def tool(raw_input: str, analysis_topic2report_path: Dict[str, str]) -> str:
+def tool(
+    report_preference: str,
+    raw_input: str,
+    analysis_topic2report_path: Dict[str, str],
+) -> str:
     """
     Format report inputs and analysis files into a structured Markdown report.
 
     Args:
+        report_preference: report should be produced (e.g., style, audience, required sections).
         raw_input: Original input content being analyzed.
         analysis_topic2report_path: Mapping of analysis topic to its file path.
 
@@ -55,6 +60,7 @@ def tool(raw_input: str, analysis_topic2report_path: Dict[str, str]) -> str:
         "Format a structured Markdown report using the provided raw input and analysis artifacts. "
         "Use the available tools to read analysis files from the given paths. "
         "Follow the structure rules, save the Markdown to the suggested path using the available tool, and return only the saved file path.\n"
+        f"Follow the report preference: {report_preference}. \n"
         f"{json.dumps(prompt_payload, ensure_ascii=False, indent=2)}"
     )
     result = rf_agent.invoke({"messages": [{"role": "user", "content": content}]})

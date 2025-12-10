@@ -1,6 +1,6 @@
 使用教程:
 
-1. 在 src/llms/.env 中补充 `ARK_API_KEY=xxxx`
+1. 在 `src/llms/.env` 中补充 `ARK_API_KEY=xxxx`
 
 2. 使用命令行进行处理分析:
 
