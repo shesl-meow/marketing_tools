@@ -141,7 +141,22 @@ def bar_chart(
     x_labels, y_values = _normalize_series(data=data, labels=labels, values=values)
 
     fig, ax = plt.subplots(figsize=figsize)
-    ax.bar(x_labels, y_values, color=color, **bar_kwargs)
+
+    # Handle color parameter - ensure it's a proper matplotlib color value
+    if color is None:
+        bar_color = None
+    elif isinstance(color, str):
+        bar_color = color
+    elif hasattr(color, '__iter__') and not isinstance(color, (str, bytes)):
+        try:
+            bar_color = list(color)
+        except TypeError:
+            bar_color = None
+    else:
+        # Handle invalid color types (like ValidatorIterator)
+        bar_color = None
+
+    ax.bar(x_labels, y_values, color=bar_color, **bar_kwargs)
 
     if title:
         ax.set_title(title)

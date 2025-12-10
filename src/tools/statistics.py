@@ -42,3 +42,22 @@ def sort_by_len(mapping: Dict[str, List[Any]], order: Order) -> List[str]:
     if order == Order.DESC:
         return sorted(mapping, key=lambda key: (-len(mapping[key]), key))
     raise ValueError(f"unsupported order: {order}")
+
+
+@tool
+def sort_by_val(mapping: Dict[str, int], order: Order) -> List[str]:
+    """Agent tool: sort mapping keys by their integer values."""
+    if order == Order.ASC:
+        return sorted(mapping, key=lambda key: (mapping[key], key))
+    if order == Order.DESC:
+        return sorted(mapping, key=lambda key: (-mapping[key], key))
+    raise ValueError(f"unsupported order: {order}")
+
+
+@tool
+def count_elements(values: List[str]) -> Dict[str, int]:
+    """Agent tool: count occurrences of each string in the provided list."""
+    counts: Dict[str, int] = {}
+    for value in values:
+        counts[value] = counts.get(value, 0) + 1
+    return counts
