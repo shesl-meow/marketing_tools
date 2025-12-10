@@ -11,7 +11,7 @@ from langchain.agents.middleware import TodoListMiddleware
 from ...llms.volcano import create_model
 from ..information_extract import demand_extract_tool
 from ..binary_classification import sanitize_comment_tool
-from ..text_classification import tool as text_classification_tool
+from ..text_classification import demand_classification_tool, sentiment_classification_tool
 from ..report_formatter import tool as report_formatter_tool
 from ...tools.file_storage import read_text_file, write_text_file
 from ...tools.statistics import invert_index, sort_by_len, sort_by_val, count_elements
@@ -36,14 +36,14 @@ def sop_preference_prompt() -> str:
     return (
         "You have a 'write_todos' tool, which can maintain a todo list for complex tasks.\n\n"
         "Generate a 'Product Iteration Proposal' by following these steps:\n"
-        "1. Sanitize the input user comments using the 'sanitize_comment' tool;\n"
-        "2. Extract all demands from the sanitized comments using the 'demand_extract_tool' tool;\n"
-        "3. Take demand as categories, classify the comments into categories using the 'text_classification' tool;\n"
-        "4. Extract the top 3 most frequent demands from the demand categories result using the 'invert_index', 'sort_by_len' tools;\n"
-        "5. Analyze the sentiment into 'positive', 'negative', 'neutral', of the sanitized comments using the 'text_classification' tool;\n"
-        "6. Count the number of comments in each sentiment category using the 'count_elements' and 'sort_by_val' tools;\n"
-        "7. Draw plot to make result more readable using the 'bar_chart', 'heap_map', 'pie_chart' tools;\n"
-        "8. Provide the graph and sub_report path to the 'report_formatter' tool to generate the final 'Product Iteration Proposal' report;"
+        "1. Sanitize the input user comments using the 'sanitize_comment_tool';\n"
+        "2. Extract all demands from the sanitized comments using the 'demand_extract_tool';\n"
+        "3. Associate the comments with extracted demands using the 'demand_classification_tool';\n"
+        "4. Analyze the sentiment of the sanitized comments using the 'sentiment_classification_tool';\n"
+        "5. Process data for report using the statistic tools: 'invert_index', 'sort_by_len', 'count_elements' and 'sort_by_val';\n"
+        "   At least we can conclude below metrics from the processed data: Top 3 most frequent demands, Percentage of all sentiment categories, Reason of negtive sentiment;"
+        "6. Draw plot to make result more readable using the 'bar_chart', 'heap_map', 'pie_chart' tools;\n"
+        "7. Provide the graph and sub_report path to the 'report_formatter' tool to generate the final 'Product Iteration Proposal' report;"
     )
 
 def agent(model=None):
@@ -68,7 +68,8 @@ def agent(model=None):
 
             sanitize_comment_tool,
             demand_extract_tool,
-            text_classification_tool,
+            demand_classification_tool,
+            sentiment_classification_tool,
             report_formatter_tool,
         ],
         system_prompt=prompt_template,

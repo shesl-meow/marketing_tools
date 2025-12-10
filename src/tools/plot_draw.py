@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import uuid
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
@@ -34,15 +35,39 @@ def _ensure_output_path(output_path: Optional[str], prefix: str) -> Path:
     return path
 
 
+def _load_mapping_from_file(data_file: str) -> Dict[str, float]:
+    """Load a label->numeric mapping from a JSON file."""
+    path = Path(data_file).expanduser()
+    if not path.exists():
+        raise FileNotFoundError(f"data file not found: {path}")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"data_file must contain a JSON object: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("data_file must contain a JSON object mapping labels to numeric values")
+
+    mapping: Dict[str, float] = {}
+    for key, value in payload.items():
+        try:
+            mapping[str(key)] = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"data_file values must be numeric; failed on key {key!r}") from exc
+    if not mapping:
+        raise ValueError("data_file contains no data")
+    return mapping
+
+
 def _normalize_series(
-    data: Optional[Dict[str, float]] = None,
+    data_file: Optional[str] = None,
     labels: Optional[Sequence[str]] = None,
     values: Optional[Sequence[float]] = None,
 ) -> Tuple[List[str], List[float]]:
     """Normalize mapping or parallel sequences into label/value lists."""
-    if data is None and (labels is None or values is None):
-        raise ValueError("provide either `data` mapping or both `labels` and `values`")
-    if data is not None:
+    if data_file is None and (labels is None or values is None):
+        raise ValueError("provide either `data_file` path or both `labels` and `values`")
+    if data_file is not None:
+        data = _load_mapping_from_file(data_file)
         labels_list = list(data.keys())
         values_list = [float(v) for v in data.values()]
     else:
@@ -57,7 +82,7 @@ def _normalize_series(
 
 @tool
 def heap_map(
-    data: Dict[str, int],
+    data_file: str,
     *,
     title: Optional[str] = None,
     cmap: str = "Blues",
@@ -69,7 +94,7 @@ def heap_map(
     Plot a simple heat map for term frequencies and return the saved image path.
 
     Args:
-        data: Mapping of label -> count.
+        data_file: Path to a JSON file containing a mapping of label -> count (Dict[str, int]).
         title: Optional chart title.
         cmap: Matplotlib colormap name for the heat map, default is "Blues".
         figsize: Figure size passed to matplotlib, default is (10.0, 1.6).
@@ -85,7 +110,7 @@ def heap_map(
     # Configure matplotlib for Chinese character support
     plt.rcParams.update(MATPLOTLIB_CHINESE_CONFIG)
 
-    labels, values = _normalize_series(data=data)
+    labels, values = _normalize_series(data_file=data_file)
     matrix = np.array([values])
 
     fig, ax = plt.subplots(figsize=figsize)
@@ -111,7 +136,7 @@ def heap_map(
 
 @tool
 def bar_chart(
-    data: Optional[Dict[str, float]] = None,
+    data_file: Optional[str] = None,
     *,
     labels: Optional[Iterable[str]] = None,
     values: Optional[Iterable[float]] = None,
@@ -128,7 +153,8 @@ def bar_chart(
     Draw a bar chart and return the saved image path.
 
     Args mirror matplotlib's bar-related options where possible, forwarding extras
-    via **bar_kwargs to `Axes.bar`.
+    via **bar_kwargs to `Axes.bar`. Provide either `data_file` (JSON object mapping
+    labels to numbers) or both `labels` and `values`.
     """
     try:
         import matplotlib.pyplot as plt
@@ -138,7 +164,7 @@ def bar_chart(
     # Configure matplotlib for Chinese character support
     plt.rcParams.update(MATPLOTLIB_CHINESE_CONFIG)
 
-    x_labels, y_values = _normalize_series(data=data, labels=labels, values=values)
+    x_labels, y_values = _normalize_series(data_file=data_file, labels=labels, values=values)
 
     fig, ax = plt.subplots(figsize=figsize)
 
@@ -176,7 +202,7 @@ def bar_chart(
 
 @tool
 def pie_chart(
-    data: Optional[Dict[str, float]] = None,
+    data_file: Optional[str] = None,
     *,
     labels: Optional[Iterable[str]] = None,
     values: Optional[Iterable[float]] = None,
@@ -191,7 +217,8 @@ def pie_chart(
     Draw a pie chart and return the saved image path.
 
     Args mirror matplotlib's pie options where possible, forwarding extras via
-    **pie_kwargs to `Axes.pie`.
+    **pie_kwargs to `Axes.pie`. Provide either `data_file` (JSON object mapping
+    labels to numbers) or both `labels` and `values`.
     """
     try:
         import matplotlib.pyplot as plt
@@ -201,7 +228,7 @@ def pie_chart(
     # Configure matplotlib for Chinese character support
     plt.rcParams.update(MATPLOTLIB_CHINESE_CONFIG)
 
-    pie_labels, pie_values = _normalize_series(data=data, labels=labels, values=values)
+    pie_labels, pie_values = _normalize_series(data_file=data_file, labels=labels, values=values)
 
     fig, ax = plt.subplots(figsize=figsize)
     wedges, texts, autotexts = ax.pie(

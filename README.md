@@ -9,5 +9,5 @@ $ pip install -r requirements.txt
 
 $ python ./src/agents/chat.py --agent main
 
-针对 `src/raw_comment_1209.json` 产出一份产品分析报告
+针对 `benchmark/raw_comment_1209.json` 产出一份产品分析报告
 ```

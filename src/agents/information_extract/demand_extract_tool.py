@@ -26,7 +26,7 @@ def demand_extract_tool(input_file_path: str, output_file_path: Optional[str] = 
 
     Returns:
         Output file path containing demand extraction results.
-        Output structure example: `[ "增加4K导出选项" ]`
+        Output structure example: `[ "改善画质" ]`
     """
     try:
         json_content = read_text_file.invoke({"file_path": input_file_path})

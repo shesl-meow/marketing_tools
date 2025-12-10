@@ -12,15 +12,15 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from langchain_openai import ChatOpenAI
 
-from src.agents.information_extract.agent import agent as info_agent
-from src.agents.sanitize_comment.agent import agent as sanitize_agent
+from src.agents.binary_classification.agent import agent as binary_agent
+from src.agents.information_extract.agent import agent as information_extract_agent
 from src.agents.text_classification.agent import agent as classify_agent
 from src.agents.main.agent import agent as main_agent
 
 
 AGENT_REGISTRY: Dict[str, Callable[[], ChatOpenAI]] = {
-    "information_extract": info_agent,
-    "sanitize_comment": sanitize_agent,
+    "binary_classification": binary_agent,
+    "information_extract": information_extract_agent,
     "text_classification": classify_agent,
     "main": main_agent,
 }
